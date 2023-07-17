@@ -10,6 +10,7 @@ import (
 	"net/http"
 
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 // serveCmd represents the serve command
@@ -23,14 +24,18 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+
+		logger, _ := zap.NewProduction()
+		defer logger.Sync() // flushes buffer, if any
+		sugar := logger.Sugar()
 		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			fmt.Fprintf(w, "Hello, %q", html.EscapeString(r.URL.Path))
 		})
 
 		http.HandleFunc("/hi", func(w http.ResponseWriter, r *http.Request) {
-			fmt.Fprintf(w, "Hi There Yolanda!")
+			fmt.Fprintf(w, "Hi There Stacklok!")
 		})
-
+		sugar.Infof("Starting server on port 8080")
 		log.Fatal(http.ListenAndServe(":8080", nil))
 	},
 }
